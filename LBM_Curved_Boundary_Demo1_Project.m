@@ -1,7 +1,7 @@
 clc; clear; close all;
 %% Defination of Parameters
 % Domain Related
-R=7.2;
+R=10.5;
 N_y=round(18*R);
 N_x=round(70*R);
 dx=1;
@@ -68,13 +68,14 @@ end
 % axis equal tight
 
 % LBM Related
-Ksi=[0 1 0 -1  0 1  -1  -1  1;...
-     0 0 1  0 -1 1   1  -1 -1]; % Lattice Velocities for D2Q9
+Ksi=[0 1 0 -1  0 1 -1 -1  1;...
+     0 0 1  0 -1 1  1 -1 -1]; % Lattice Velocities for D2Q9
 w=[4/9 1/9 1/9 1/9 1/9 1/36 1/36 1/36 1/36]; % Weights for D2Q9
 c_s=1/sqrt(3); % Speed of Sound for D2Q9
-Tau=0.9; % Relaxation Time
+Tau=0.8; % Relaxation Time
 % Rho_in=2.1;
-U_in = 0.19;
+Re = 46;
+U_in = (Re*(Tau-0.5)*c_s^2)/(2*R);
 %% Initialization
 Rho_ref=2;
 Rho=ones(1,N_y,N_x)*Rho_ref;
@@ -91,6 +92,8 @@ f_eq=f;
 
 %% Timer
 Timer=2e4;
+Residuals = zeros(1, Timer);
+tic
 %% Solving
 for t=1:Timer
 % Streaming/Boundary Conditions
@@ -130,7 +133,7 @@ for j=1:N_y
                 f_star=w(2)*Rho(1,j,i)*(1+...
                                         U_bf'*Ksi(:,2)/c_s^2+...
                                         (U_f'*Ksi(:,2))^2/(2*c_s^4)-...
-                                        (U_f'*U_f)/(2*c_s^2));
+                                        (dot(U_f,U_f))/(2*c_s^2));
                 % Final step
                 f_new(4,j,i)=(1-Chi)*f(2,j,i)+Chi*f_star;
             else
@@ -163,7 +166,7 @@ for j=1:N_y
                 f_star=w(3)*Rho(1,j,i)*(1+...
                                         U_bf'*Ksi(:,3)/c_s^2+...
                                         (U_f'*Ksi(:,3))^2/(2*c_s^4)-...
-                                        (U_f'*U_f)/(2*c_s^2));
+                                        (dot(U_f,U_f))/(2*c_s^2));
                 % Final step
                 f_new(5,j,i)=(1-Chi)*f(3,j,i)+Chi*f_star;
             else
@@ -196,7 +199,7 @@ for j=1:N_y
                 f_star=w(4)*Rho(1,j,i)*(1+...
                                         U_bf'*Ksi(:,4)/c_s^2+...
                                         (U_f'*Ksi(:,4))^2/(2*c_s^4)-...
-                                        (U_f'*U_f)/(2*c_s^2));
+                                        (dot(U_f,U_f))/(2*c_s^2));
                 % Final step
                 f_new(2,j,i)=(1-Chi)*f(4,j,i)+Chi*f_star;
             else
@@ -229,7 +232,7 @@ for j=1:N_y
                 f_star=w(5)*Rho(1,j,i)*(1+...
                                         U_bf'*Ksi(:,5)/c_s^2+...
                                         (U_f'*Ksi(:,5))^2/(2*c_s^4)-...
-                                        (U_f'*U_f)/(2*c_s^2));
+                                        (dot(U_f,U_f))/(2*c_s^2));
                 % Final step
                 f_new(3,j,i)=(1-Chi)*f(5,j,i)+Chi*f_star;
             else
@@ -262,7 +265,7 @@ for j=1:N_y
                 f_star=w(6)*Rho(1,j,i)*(1+...
                                         U_bf'*Ksi(:,6)/c_s^2+...
                                         (U_f'*Ksi(:,6))^2/(2*c_s^4)-...
-                                        (U_f'*U_f)/(2*c_s^2));
+                                        (dot(U_f,U_f))/(2*c_s^2));
                 % Final step
                 f_new(8,j,i)=(1-Chi)*f(6,j,i)+Chi*f_star;
             else
@@ -295,7 +298,7 @@ for j=1:N_y
                 f_star=w(7)*Rho(1,j,i)*(1+...
                                         U_bf'*Ksi(:,7)/c_s^2+...
                                         (U_f'*Ksi(:,7))^2/(2*c_s^4)-...
-                                        (U_f'*U_f)/(2*c_s^2));
+                                        (dot(U_f,U_f))/(2*c_s^2));
                 % Final step
                 f_new(9,j,i)=(1-Chi)*f(7,j,i)+Chi*f_star;
             else
@@ -328,7 +331,7 @@ for j=1:N_y
                 f_star=w(8)*Rho(1,j,i)*(1+...
                                         U_bf'*Ksi(:,8)/c_s^2+...
                                         (U_f'*Ksi(:,8))^2/(2*c_s^4)-...
-                                        (U_f'*U_f)/(2*c_s^2));
+                                        (dot(U_f,U_f))/(2*c_s^2));
                 % Final step
                 f_new(6,j,i)=(1-Chi)*f(8,j,i)+Chi*f_star;
             else
@@ -361,7 +364,7 @@ for j=1:N_y
                 f_star=w(9)*Rho(1,j,i)*(1+...
                                         U_bf'*Ksi(:,9)/c_s^2+...
                                         (U_f'*Ksi(:,9))^2/(2*c_s^4)-...
-                                        (U_f'*U_f)/(2*c_s^2));
+                                        (dot(U_f,U_f))/(2*c_s^2));
                 % Final step
                 f_new(7,j,i)=(1-Chi)*f(9,j,i)+Chi*f_star;
             else
@@ -376,10 +379,10 @@ for j=1:N_y
                     f_new(7,j,i) = f(7,j+1,i+1);
 
                     % Unknown
-                    Rho_in=(f_new(1,j,i)+f_new(3,j,i)+f(5,j,i)+2*(f_new(4,j,i)+f_new(7,j,i)+f(8,j,i)))/(1-U_in);
+                    f_new(5,j,i) = f_new(5,N_y-1,1);
+                    f_new(8,j,i) = f_new(8,N_y-1,2);
+                    Rho_in=(f_new(1,j,i)+f_new(3,j,i)+f_new(5,j,i)+2*(f_new(4,j,i)+f_new(7,j,i)+f_new(8,j,i)))/(1-U_in);
                     f_new(2,j,i) = f_new(4,j,i)+Rho_in*U_in*2/3;
-                    f_new(5,j,i) = f(5,N_y-1,1);
-                    f_new(8,j,i) = f(8,N_y-1,2);
                     f_new(6,j,i) = f_new(8,j,i)+(f_new(5,j,i)-f_new(3,j,i))/2+Rho_in*U_in/6;
                     f_new(9,j,i) = f_new(7,j,i)-(f_new(5,j,i)-f_new(3,j,i))/2+Rho_in*U_in/6;
                 elseif i == N_x % Top-right corner node
@@ -389,11 +392,11 @@ for j=1:N_y
                     f_new(6,j,i) = f(6,j+1,i-1);
 
                     % Unknown
-                    f_new(4,j,i) = f_new(2,j,i);
-                    f_new(5,j,i) = f(5,N_y-1,N_x);
+                    f_new(4,j,i) = f_new(4,j,i-1);
+                    f_new(5,j,i) = f_new(5,N_y-1,N_x);
                     f_new(7,j,i) = f_new(7,j,i-1);
-                    f_new(8,j,i) = f_new(6,j,i);
-                    f_new(9,j,i) = f(9,N_y-1,N_x-1);
+                    f_new(8,j,i) = f_new(8,j,i-1);
+                    f_new(9,j,i) = f_new(9,N_y-1,N_x-1);
                 else % All other nodes on the top boundary
                     f_new(1,j,i) = f(1,j,i);
                     f_new(2,j,i) = f(2,j,i-1);
@@ -403,9 +406,9 @@ for j=1:N_y
                     f_new(7,j,i) = f(7,j+1,i+1);
 
                     % Unknown
-                    f_new(5,j,i) = f(5,N_y-1,i);
-                    f_new(8,j,i) = f(8,N_y-1,i+1);
-                    f_new(9,j,i) = f(9,N_y-1,i-1);
+                    f_new(5,j,i) = f_new(5,N_y-1,i);
+                    f_new(8,j,i) = f_new(8,N_y-1,i+1);
+                    f_new(9,j,i) = f_new(9,N_y-1,i-1);
                 end
             elseif j == N_y % This is the bottom boundary nodes
                 if i ==1 % Bottom-Left corner node
@@ -415,10 +418,10 @@ for j=1:N_y
                     f_new(8,j,i) = f(8,j-1,i+1);
 
                     % Unknown
-                    Rho_in=(f_new(1,j,i)+f(3,j,i)+f_new(5,j,i)+2*(f_new(4,j,i)+f(7,j,i)+f_new(8,j,i)))/(1-U_in);
-                    f_new(2,j,i) = f_new(4,j,i)+Rho_in*U_in*2/3;
                     f_new(3,j,i) = f_new(3,2,1);
                     f_new(7,j,i) = f_new(7,2,2);
+                    Rho_in=(f_new(1,j,i)+f_new(3,j,i)+f_new(5,j,i)+2*(f_new(4,j,i)+f_new(7,j,i)+f_new(8,j,i)))/(1-U_in);
+                    f_new(2,j,i) = f_new(4,j,i)+Rho_in*U_in*2/3;
                     f_new(6,j,i) = f_new(8,j,i)+(f_new(5,j,i)-f_new(3,j,i))/2+Rho_in*U_in/6;
                     f_new(9,j,i) = f_new(7,j,i)-(f_new(5,j,i)-f_new(3,j,i))/2+Rho_in*U_in/6;
                 elseif i == N_x % Bottom-right corner node
@@ -429,10 +432,10 @@ for j=1:N_y
 
                     % Unknown
                     f_new(3,j,i) = f_new(3,2,N_x);
-                    f_new(4,j,i) = f_new(2,j,i);
+                    f_new(4,j,i) = f_new(4,j,i-1);
                     f_new(6,j,i) = f_new(6,2,N_x-1);
-                    f_new(7,j,i) = f_new(9,j,i);
-                    f_new(8,j,i) = f_new(6,j,i);
+                    f_new(7,j,i) = f_new(7,j,i-1);
+                    f_new(8,j,i) = f_new(8,j,i-1);
                 else % All other nodes on the bottom boundary
                     f_new(1,j,i) = f(1,j,i);
                     f_new(2,j,i) = f(2,j,i-1);
@@ -495,6 +498,7 @@ f_eq=pagemtimes(w',Rho).*(1+3*pagemtimes(Ksi',U)+9/2*(pagemtimes(Ksi',U).^2)-3/2
 % BGK Collision & Update
 f=f_new-(f_new-f_eq)/Tau;
 end
+toc
 %% Post-Processing/Visualizaation
 % y_benchmark=0:0.01:1;
 % for i=1:length(y_benchmark)
@@ -511,12 +515,12 @@ end
 % plot((0:1:N_y-1)/(N_y-1),u_sim/max(u_sim),"blue")
 
 figure
-quiver(flipud(squeeze(U(1,:,:))),flipud(squeeze(U(2,:,:))),30)
+quiver(flipud(squeeze(U(1,:,:))),flipud(squeeze(U(2,:,:))),1)
 axis equal tight
 
-figure
-contourf(flipud(squeeze(Rho)),30)
-axis equal tight
+% figure
+% contourf(flipud(squeeze(Rho)),30)
+% axis equal tight
 
 Re = U_in*2*R/(Tau-0.5)/c_s^2;
 Mach = U_in/c_s;
